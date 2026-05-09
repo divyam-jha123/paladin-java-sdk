@@ -1,0 +1,125 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+    id 'jacoco'
+    id 'idea'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withJavadocJar()
+    withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    jacksonVersion = '2.18.2'
+    slf4jVersion = '2.0.16'
+    junitVersion = '5.11.4'
+    assertjVersion = '3.27.3'
+    mockwebserverVersion = '4.12.0'
+    javaWebSocketVersion = '1.6.0'
+}
+
+dependencies {
+    api "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    api "org.slf4j:slf4j-api:${slf4jVersion}"
+
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${mockwebserverVersion}"
+    testImplementation "org.java-websocket:Java-WebSocket:${javaWebSocketVersion}"
+    testRuntimeOnly "org.slf4j:slf4j-simple:${slf4jVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        showExceptions true
+        showStackTraces true
+        exceptionFormat 'full'
+    }
+    finalizedBy tasks.named('jacocoTestReport')
+}
+
+jacocoTestReport {
+    dependsOn tasks.named('test')
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+    options.compilerArgs += ['-Xlint:all', '-parameters']
+}
+
+javadoc {
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            pom {
+                name = 'Paladin Java SDK'
+                description = 'Idiomatic Java client for the LFDT Paladin programmable privacy platform.'
+                url = 'https://github.com/LFDT-Paladin/paladin'
+                inceptionYear = '2026'
+                licenses {
+                    license {
+                        name = 'Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'paladin-maintainers'
+                        name = 'Paladin Maintainers'
+                        organization = 'LF Decentralized Trust'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/LFDT-Paladin/paladin.git'
+                    developerConnection = 'scm:git:git@github.com:LFDT-Paladin/paladin.git'
+                    url = 'https://github.com/LFDT-Paladin/paladin'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'central'
+            def releasesUrl = 'https://central.sonatype.com/api/v1/publisher'
+            def snapshotsUrl = 'https://central.sonatype.com/repository/maven-snapshots/'
+            url = version.toString().endsWith('SNAPSHOT') ? snapshotsUrl : releasesUrl
+            credentials {
+                username = findProperty('centralUsername') ?: System.getenv('CENTRAL_USERNAME')
+                password = findProperty('centralPassword') ?: System.getenv('CENTRAL_PASSWORD')
+            }
+        }
+    }
+}
+
+signing {
+    required = { gradle.taskGraph.hasTask('publish') && !version.toString().endsWith('SNAPSHOT') }
+    def signingKey = findProperty('signingKey') ?: System.getenv('SIGNING_KEY')
+    def signingPassword = findProperty('signingPassword') ?: System.getenv('SIGNING_PASSWORD')
+    if (signingKey && signingPassword) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+    }
+    sign publishing.publications.maven
+}

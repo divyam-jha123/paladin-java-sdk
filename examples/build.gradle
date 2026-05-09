@@ -1,0 +1,26 @@
+plugins {
+    id 'application'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories { mavenCentral() }
+
+dependencies {
+    implementation rootProject
+    implementation 'org.slf4j:slf4j-simple:2.0.16'
+}
+
+application {
+    mainClass = 'io.lfdt.paladin.examples.QuickStart'
+}
+
+tasks.named('run', JavaExec) {
+    if (project.hasProperty('targetUrl')) {
+        args project.targetUrl
+    }
+}
