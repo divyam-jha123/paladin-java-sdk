@@ -21,12 +21,12 @@ source. The code maps 1:1 onto Paladin's JSON-RPC method namespace: `ptx_*`, `pg
 
 ### Live Example Run — SDK driving a real Paladin devnet
 
-<img src="./assets/why-1.png" style="width: 1000px; height: 180px">
+<img src="./assets/why-1.png" style="width: 600px; height: 300px">
 
 
 ### Paladin Devnet Pods — 3 Paladin nodes + 3 Besu nodes running in Kind
 
-<img src="./assets/why-2.png" style="width: 1000px; height: 180px">
+<img src="./assets/why-2.png" style="width: 700px; height: 280px">
 
 ## Quick start
 

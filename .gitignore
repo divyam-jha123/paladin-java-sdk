@@ -86,3 +86,6 @@ secrets.properties
 
 # Docs
 docs/ARCHITECTURE.md
+
+# Downloaded tools
+paladin-kind.yaml
