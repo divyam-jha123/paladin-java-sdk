@@ -28,6 +28,10 @@ source. The code maps 1:1 onto Paladin's JSON-RPC method namespace: `ptx_*`, `pg
 
 <img src="./assets/why-2.png" style="width: 700px; height: 280px">
 
+### Running tests locally
+
+<img src="./assets/test.png" style="width: 500px; height: 200px">
+
 ## Quick start
 
 ```java
